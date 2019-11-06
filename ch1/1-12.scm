@@ -1,0 +1,10 @@
+(define (pascal i j)
+        (cond ((= j 0) 1)
+              ((= i j) 1)
+              (else (+ (pascal (- i 1) (- j 1)) (pascal (- i 1) j)))))
+
+(pascal 4 0)
+(pascal 4 1)
+(pascal 4 2)
+(pascal 4 3)
+(pascal 4 4)
