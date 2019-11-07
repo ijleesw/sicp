@@ -1,0 +1,11 @@
+(define (fast-expt b n)
+    (define (even? n)
+            (= (remainder n 2) 0))
+    (define (fast-expt-sub m b n)
+            (cond ((= n 0) m)
+                  (else (if (even? n)
+                            (fast-expt-sub m (square b) (quotient n 2))
+                            (fast-expt-sub (* m b) (square b) (quotient n 2))))))
+    (fast-expt-sub 1 b n))
+
+(fast-expt 2 47)
