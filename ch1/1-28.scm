@@ -8,7 +8,7 @@
 (define (get-squared-remainder val m)
     (if (and (= (remainder (square val) m) 1)
              (not (= (remainder val m) 1))
-             (not (= (remainder val m) (- m 1)))))
+             (not (= (remainder val m) (- m 1))))
         0
         (remainder (square val) m)))
 
