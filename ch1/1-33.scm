@@ -23,6 +23,6 @@
 (sum-squared-primes 1 12)  ; 208
 
 (define (prod-coprimes n)
-    (filtered-accumulate (lambda (x y) (* x y)) 1 (lambda (x) (= (gcd x n) 1)) (lambda (x) x) 1 (lambda (x) (+ x 1)) n)))
+    (filtered-accumulate (lambda (x y) (* x y)) 1 (lambda (x) (= (gcd x n) 1)) (lambda (x) x) 1 (lambda (x) (+ x 1)) n))
 
 (prod-coprimes 12)  ; 385
