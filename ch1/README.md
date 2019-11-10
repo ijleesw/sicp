@@ -1,4 +1,4 @@
-# Summary (in Korean)
+# Summary
 
 ## 1.1 프로그램 짤 때 바탕이 되는 것
 
@@ -42,7 +42,6 @@
 - `foldl'`의 scheme 버전은 아래와 같다.
 ```scheme
 (accumulate combiner null-value term a next b)
-(filtered-accumulate combiner predicate null-value term a next b)
 ```
 
 - Scheme을 쓰면 하려는 작업을 수학적으로 아름답게 표현 가능하다!
