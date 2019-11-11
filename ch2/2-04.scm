@@ -1,0 +1,10 @@
+(define (cons x y)
+    (lambda (m) (m x y)))   ;; a function that receives another function m and returns m(x, y)
+(define (car z)
+    (z (lambda (p q) p)))
+(define (cdr z)
+    (z (lambda (p q) q)))
+
+(define z (cons 2 3))
+(car z)
+(cdr z)
