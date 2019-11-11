@@ -41,7 +41,10 @@
 
 - `foldl'`의 scheme 버전은 아래와 같다.
 ```scheme
-(accumulate combiner null-value term a next b)
+(define (accumulate combiner null-value term a next b)
+    (if (> a b)
+        null-value
+        (combiner (term a) (accumulate combiner null-value term (next a) next b))))
 ```
 
 - Scheme을 쓰면 하려는 작업을 수학적으로 아름답게 표현 가능하다!
@@ -52,3 +55,25 @@
 (define (sqrt x)
     (fixed-point (lambda (y) (/ x y)) 1.0))
 ```
+
+- **경험이 많은 프로그래머일수록 계산 방법이 또렷이 드러나도록 프로시저를 꾸밀 줄 알고, 한 계산 방법에서 쓸모 있는 것을 도려내어 다른 문제를 풀 때 다시 쓸 수 있게끔 따로 간추릴 줄 안다.**
+
+- 뉴튼 방법
+  - f가 미분 가능할 때, f의 root는 g(x) = x - (f(x) / f'(x))의 fixed point와 같다.
+    - root에서 derivative가 0이 아니라는 조건이 추가되어야 할 것 같지만..
+  - 이건 아래와 같이 표현 가능하다
+```scheme
+;; 1차로 줄인 거
+(define (newtons-method f guess)
+    (fixed-point (newton-transform g) guess))   ;; (newton-transform : f |-> g)
+
+;; 2차로 줄인 거
+(define (newtons-method f guess)
+    (fixed-point-of-transform f newton-transform guess))
+```
+
+- first-class object (일등급 객체) 란?
+  - 이름이 붙을 수 있다. (변수의 값이 될 수 있다.)
+  - 프로시저의 인자로 쓸 수 있다.
+  - 프로시저의 결과로 만들어질 수 있다.
+  - 데이터 구조 속에 집어넣을 수 있다.
