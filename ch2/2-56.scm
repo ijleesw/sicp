@@ -1,4 +1,4 @@
-(load "2.3.2.scm")
+(load "deriv-base.scm")
 
 (define (exponentation? e) (and (list? e) (eq? (car e) '**)))
 (define (base e) (cadr e))

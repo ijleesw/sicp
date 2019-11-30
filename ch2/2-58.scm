@@ -1,4 +1,4 @@
-(load "2.3.2.scm")
+(load "deriv-base.scm")
 
 ;; a.
 (define (make-sum a1 a2)

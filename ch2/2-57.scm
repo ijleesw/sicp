@@ -1,4 +1,4 @@
-(load "2.3.2.scm")
+(load "deriv-base.scm")
 
 (define (addend s)
     (if (= (length s) 3)
