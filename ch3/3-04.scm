@@ -1,0 +1,31 @@
+(define (make-account balance passwd)
+    (let ((wrong-count 0))
+        (define (withdraw amount)
+            (if (>= balance amount)
+                (begin (set! balance (- balance amount)) balance)
+                "Insufficient funds"))
+        (define (deposit amount)
+            (set! balance (+ balance amount)) balance)
+        (define call-the-cops (lambda (x) "call-the-cops"))
+        (lambda (input-passwd m)
+            (if (not (eq? input-passwd passwd))
+                (begin (set! wrong-count (+ wrong-count 1))
+                       (if (>= wrong-count 7) call-the-cops (lambda (x) "Incorrect password")))
+                (cond ((eq? m 'withdraw) withdraw)
+                      ((eq? m 'deposit) deposit)
+                      (else (error "Unknown request -- MAKE-ACCOUNT" m)))))))
+
+(define acc (make-account 100 'secret))
+
+((acc 'secret 'withdraw) 20)
+((acc 'not-secret 'withdraw) 20)
+
+((acc 'secret 'deposit) 30)
+((acc 'not-secret 'deposit) 30)
+
+((acc 'not-secret 'deposit) 30)
+((acc 'not-secret 'deposit) 30)
+((acc 'not-secret 'deposit) 30)
+((acc 'not-secret 'deposit) 30)
+((acc 'not-secret 'deposit) 30)  ;; 7-th
+((acc 'not-secret 'deposit) 30)

@@ -1,0 +1,20 @@
+(define (make-account balance passwd)
+    (define (withdraw amount)
+        (if (>= balance amount)
+            (begin (set! balance (- balance amount)) balance)
+            "Insufficient funds"))
+    (define (deposit amount)
+        (set! balance (+ balance amount)) balance)
+    (lambda (input-passwd m)
+        (cond ((not (eq? input-passwd passwd)) (lambda (x) "Incorrect password"))
+              ((eq? m 'withdraw) withdraw)
+              ((eq? m 'deposit) deposit)
+              (else (error "Unknown request -- MAKE-ACCOUNT" m)))))
+
+(define acc (make-account 100 'secret))
+
+((acc 'secret 'withdraw) 20)
+((acc 'not-secret 'withdraw) 20)
+
+((acc 'secret 'deposit) 30)
+((acc 'not-secret 'deposit) 30)
