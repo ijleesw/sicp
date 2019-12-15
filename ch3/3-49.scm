@@ -1,0 +1,2 @@
+; Let there be objects from 0 to 9. Each object has a list of other objects to perform operation. However, the list cannot be access without acquiring the object's lock.
+; Then, to check a list, src object's lock must be acquired. But if we get the list and release the lock, the list can be modified. Thus, we have to proceed the operation without releasing the lock, which can lead to the deadlock situation.

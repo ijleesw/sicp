@@ -61,3 +61,60 @@
 (eq? 'a 'A)     ;; #t
 (eq? 'a 'aa)    ;; #f
 ```
+
+## 3.4 Concurrency : Time Is of the Essence
+
+- x = x'을 가져오고, 조작하고, 대입하는 세 과정으로 쪼개서 interleaved되는 상황을 다룬다.
+- 그리고 그걸 해결하기 위해 mutex를 소개한다.
+
+- make-serializer의 내부 구현을 보면, mutex를 잡고 apply를 하고 mutex를 놓는다.
+  - 이때 mutex를 잡은 상태에서, mutex로 보호받는 variable을 잘못 짜인 procedure가 acquire 없이 접근 할 수 있다! (Exercise 3.40 참고)
+
+- 나머지는 OS 수업에서 많이 다뤘으므로 생략한다.
+
+## 3.5 Streams
+
+- Stream
+  - 이론상 :
+  - 구현상 : pair의 second를 procedure form으로 바꿔서 저장한 list. second를 원할 때 procedure form을 evaluate하여 값을 가져온다 (call-on-need).
+
+### 3.5.1 Streams Are Delayed Lists
+
+- `cons-stream` : first는 value로, second는 promise로 바꿔 delay시킨 뒤 pair를 만들어준다.
+- `stream-car` : stream의 first는 value이므로 `car`과 동일하게 값을 가져온다.
+- `stream-cdr` : promise인 second를 `force`로 계산시켜서 가져온다. 이때 second의 first만 값이 되고, second의 second는 여전히 promise이다.
+- `delay` : (delay x) -> (lambda () (x))로 바뀐다. 즉, procedure form으로 만들어 계산되지 않도록 해준다.
+- (optimized) `delay` : proc을 받아서 (procedure form, already-run?, result)의 tuple을 만들어 보관한다. 첫 방문때 procedure form을 evaluate하여 result에 저장하고 already-run?을 `#t`로 바꾼다. 그 이후로는 result만 내뱉는다.
+- `force` : (define (force x) ()). 즉, procedure form을 받아서 evaluate 해준다.
+
+- Note : `delay`는 keyword이고, keyword는 procedure가 아니다.
+  - (procedure x)는 x를 미리 계산한 뒤에 procedure를 적용한다.
+  - 근데 그러면 (define (delay x) (lambda () (x))) 라 하더라도 x가 먼저 계산된 뒤에 lambda에 씌워진다.
+  - 따라서 keyword를 두어 (preprocessor처럼) procedure 계산 전에 form을 바꿔주도록 한다.
+    - let을 lambda 꼴로 바꿔주고 delay를 lambda 꼴로 바꿔주면 x를 계산하지 않고도 원하는 form을 만들 수 있다.
+- Note : `cons`는 procedure이지만 `cons-stream`은 keyword이다.
+  - `cons`는 evaluation을 다 해도 상관 없지만 `cons-stream`은 second의 evaluation을 하면 안 되기 때문에 procedure가 될 수 없다.
+
+- `delay`에 memoization을 넣으면 모든 side-effect는 한 번만 일어난다.
+  - 동일한 base stream object를 여러 object가 procedure 내에서 공유할 때, 공유하는 object들끼리 interleaved 되어서 여러번 값이 evaluate 되더라도 base object가 한 번만 evaluate되기 때문에 값은 항상 동일하다. (Exercise 3.53 참고)
+
+### 3.5.2 Infinite Streams
+
+```scheme
+(define fibs
+    (cons-stream 0 (cons-stream 1 (add-stream fib (stream-cdr fib)))))
+````
+- 위 프로그램은 아래와 같이 해석된다:
+  - fibs(0) = 0
+  - fibs(1) = 1
+  - fibs(i) = fibs(i-2) + fibs(i-1) where i >= 2
+
+```scheme
+(define exp-series (cons-stream 1 (integrate-series exp-series)))
+(define (mul-series s1 s2)
+    (cons-stream (* (stream-car s1) (stream-car s2))
+                 (add-streams (scale-stream (stream-cdr s1) (stream-car s2))
+                              (mul-series s1 (stream-cdr s2)))))
+(display-stream-until 20 (mul-series exp-series exp-series))
+```
+- infinite stream은 위와 같이 power series를 다루는 데에 유용하게 사용할 수 있다.
