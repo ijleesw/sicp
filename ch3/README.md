@@ -115,6 +115,58 @@
     (cons-stream (* (stream-car s1) (stream-car s2))
                  (add-streams (scale-stream (stream-cdr s1) (stream-car s2))
                               (mul-series s1 (stream-cdr s2)))))
-(display-stream-until 20 (mul-series exp-series exp-series))
 ```
 - infinite stream은 위와 같이 power series를 다루는 데에 유용하게 사용할 수 있다.
+
+### 3.5.3 Exploiting the Stream Paradigm
+
+- infinite stream 사용처:
+  - sqrt(2)를 res를 덮어 쓰면서 계산하는 대신, sqrt(2)로 근사하는 stream을 만들 수 있다. (1, 1.4, 1.41, 1.414, ...)
+  - N x N의 모든 원소를 나열할 수 있다. (임의의 자연수 k에 대해 N ^ k도 가능)
+  - 적분을 무한소의 무한합으로 모사할 수 있다. ([0, \inf)에 대한 적분만 모사 가능)
+
+### 3.5.4 Streams and Delayed Evaluation
+
+- infinite stream 사용처:
+  - 미분방정식을 풀 수 있다(!)
+  - y' = y의 경우
+```scheme
+(define (solve f y0 dt)
+    (define y (integral (delay dy) y0 dt))
+    (define dy (stream-map f y))
+    y)
+```
+  - y'' - ay' - b = 0의 경우
+```scheme
+(define (solve-2nd a b dt y0 dy0)
+    (define y (integral (delay dy) y0 dt))
+    (define dy (integral (delay ddy) dy0 dt))
+    (define ddy (add-streams (scale-stream dy a) (scale-stream y b)))
+    y)
+```
+- Normal-order evaluation
+  - 사실 위에서 미방을 풀 때처럼 모든 원소에 delay를 넣고, 그걸 가져다 쓰는 곳에서 force하도록 할 수 있다.
+  - 그러면 stream을 순환되게 정의할 수 있다.
+  - 대신 그러면 applicative-order eval 대신 normal-order eval을 따르게 된다.
+  - procedure param의 값을 다 구한 다음에 body를 apply하는 대신, 식을 다 풀어쓴 다음에 eval하기 시작하게 된다.
+
+### 3.5.5 Modularity of Functional Programs and Modularity of Objects
+
+- stream을 쓰면 state가 있는 물체를 stateless하게 바꿀 수 있다.
+  - 예를 들어, random number generator를 아래와 같이 설계할 수 있다.
+```scheme
+(define (rng seed)
+    (let ((next (rand-update seed)))
+        (cons-stream next (rng next))))
+```
+- 하지만 이게 항상 정답은 아니다!
+  - account가 2개 있는 bank system에 query stream이 2개 들어온다고 하자.
+  - bank system은 두 stream을 `merge`한 다음에 `process`한다고 하자.
+  - 그런데 stream 자체는 timeless한데, `merge`는 real-time의 영향을 받는다!
+
+- 결국 세상에 대한 두 관점 사이의 긴장 속에 놓여있는 셈이다.
+  - world = a collection of separate, time-bound, interacting objects with state
+  - world = a single, timeless, stateless unity
+- 뭘 선택하느냐는 상황에 따라 다르다.
+  - 각 object들 만의 고유한 영역이 크거나 (bank account)
+  - object들의 통일성이 중요하거나 (signal)
